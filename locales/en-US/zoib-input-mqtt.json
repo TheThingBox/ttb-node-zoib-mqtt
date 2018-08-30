@@ -1,0 +1,32 @@
+{
+    "zoib-input-mqtt": {
+        "server": "Server",
+        "port": "Port",
+        "clientid": "Client ID",
+        "keepalive": "Keep alive time (sec)",
+        "cleansession": "Use clean session",
+        "compatmode": "Use legacyMQTT 3.1 support",
+        "topic": "Topic",
+        "qos": "QoS",
+        "retain": "Retain",
+        "username": "Username",
+        "password": "Password",
+        "name": "Name",
+        "zoib": {
+          "server": "ZOIB server"
+        },
+        "tabs-label": {
+            "broker": "Broker",
+            "topic": "Topic",
+            "options": "Options",
+            "credentials": "Credentials",
+            "name": "Name"
+        },
+        "inputs": {
+            "setBy": "set by",
+            "number" : "number",
+            "auto": "automatic",
+            "none": "none"
+        }
+    }
+}

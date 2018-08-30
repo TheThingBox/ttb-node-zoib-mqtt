@@ -1,0 +1,1096 @@
+<!--
+    Copyright (c) 2017 Digital Airways (www.DigitalAirways.com)
+    This work is free. You can redistribute it and/or modify it under the
+    terms of the "Do What The Fuck You Want To" Public License, Version 2,
+    as published by Sam Hocevar.
+    See http://www.wtfpl.net for more details.
+-->
+<script type="text/x-red" data-template-name="zoib-input-mqtt">
+    <div class="form-row">
+        <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-zoib-mqtt-tabs"></ul>
+    </div>
+    <div id="node-zoib-mqtt-tabs-content" style="min-height: 170px;">
+        <div id="zoib-mqtt-tab-broker" style="display:none">
+            <div class="form-row">
+                <label for="node-input-broker"><i class="fa fa-globe"></i> <span data-i18n="zoib-input-mqtt.server"></span></label>
+                <input type="text" id="node-input-broker" style="width:70%">
+                <input type="hidden" id="node-input-brokerType">
+            </div>
+            <div class="form-row">
+                <label for="node-input-port"><i class="fa fa-globe"></i> <span data-i18n="zoib-input-mqtt.port"></label>
+                <input type="text" id="node-input-port" style="width:70%">
+                <input type="hidden" id="node-input-portType">
+            </div>
+        </div>
+        <div id="zoib-mqtt-tab-broker-option" style="display:none">
+            <div class="form-row">
+                <label for="node-input-clientid"><i class="fa fa-tag"></i> <span data-i18n="zoib-input-mqtt.clientid"></label>
+                <input type="text" id="node-input-clientid" style="width:70%">
+                <input type="hidden" id="node-input-clientidType">
+            </div>
+            <div class="form-row">
+                <label for="node-input-keepalive" style="width:auto"><i class="fa fa-clock-o"></i> <span data-i18n="zoib-input-mqtt.keepalive"></label>
+                <br/>
+                <span style="margin-left:100px"></span>
+                    <input type="text" id="node-input-keepalive" style="width:70%">
+                    <input type="hidden" id="node-input-keepaliveType">
+            </div>
+            <div class="form-row">
+                <label for="node-input-cleansession" style="width:auto"><i class="fa fa-check"></i> <span data-i18n="zoib-input-mqtt.cleansession"></label>
+                <br/>
+                <span style="margin-left:100px"></span>
+                    <input type="text" id="node-input-cleansession" style="width:70%">
+                    <input type="hidden" id="node-input-cleansessionType">
+            </div>
+            <div class="form-row">
+                <label for="node-input-compatmode" style="width:auto"><i class="fa fa-check"></i> <span data-i18n="zoib-input-mqtt.compatmode"></label>
+                <br/>
+                <span style="margin-left:100px"></span>
+                    <input type="text" id="node-input-compatmode" style="width:70%">
+                    <input type="hidden" id="node-input-compatmodeType">
+            </div>
+        </div>
+        <div id="zoib-mqtt-tab-topic" style="display:none">
+            <div class="form-row">
+                <label for="node-input-topic"><i class="fa fa-globe"></i> <span data-i18n="zoib-input-mqtt.topic"></label>
+                <input type="text" id="node-input-topic" style="width:70%">
+                <input type="hidden" id="node-input-topicType">
+            </div>
+            <div class="form-row">
+                <label for="node-input-qos"><i class="fa fa-empire"></i> <span data-i18n="zoib-input-mqtt.qos"></label>
+                <input type="text" id="node-input-qos" style="width:70%">
+                <input type="hidden" id="node-input-qosType">
+            </div>
+        </div>
+        <div id="zoib-mqtt-tab-credential" style="display:none">
+            <div class="form-row">
+                <label for="node-input-user"><i class="fa fa-user"></i> <span data-i18n="zoib-input-mqtt.username"></label>
+                <input type="text" id="node-input-user" style="width:70%">
+                <input type="hidden" id="node-input-userType">
+            </div>
+            <div class="form-row">
+                <label for="node-input-password"><i class="fa fa-lock"></i> <span data-i18n="zoib-input-mqtt.password"></label>
+                <input type="password" id="node-input-password" style="width:70%">
+                <input type="hidden" id="node-input-passwordType">
+            </div>
+            <div class="form-row">
+                <label for="node-input-zoib"><i class="fa fa-lock"></i> <span data-i18n="zoib-input-mqtt.zoib.server"></label>
+                <input type="text" id="node-input-zoib" style="width:70%">
+                <input type="hidden" id="node-input-zoibType">
+            </div>
+        </div>
+        <div id="zoib-mqtt-tab-name" style="display:none">
+            <div class="form-row">
+                <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="zoib-input-mqtt.name"></label>
+                <input type="text" id="node-input-name" placeholder="Name">
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/javascript">
+    RED.nodes.registerType('zoib-input-mqtt', {
+        category: "advanced",
+        defaults: {
+            broker: {
+                value: ""
+            },
+            brokerType: {
+                value: "setBroker"
+            },
+            port: {
+                value: ""
+            },
+            portType: {
+                value: "setPort"
+            },
+            clientid: {
+                value: ""
+            },
+            clientidType: {
+                value: "auto"
+            },
+            keepalive: {
+                value: "15"
+            },
+            keepaliveType: {
+                value: "num"
+            },
+            cleansession: {
+                value: "true"
+            },
+            cleansessionType: {
+                value: "bool"
+            },
+            compatmode: {
+                value: "true"
+            },
+            compatmodeType: {
+                value: "bool"
+            },
+            topic: {
+                value: "",
+                validate: function(v) {
+                    var ttype = $("#node-input-topicType").val() || this.topicType;
+                    if (ttype != "setTopic" && v.trim() === "") {
+                        return false;
+                    }
+                    return true;
+                }
+            },
+            topicType: {
+                value: "setTopic"
+            },
+            qos: {
+                value: "2"
+            },
+            qosType: {
+                value: "numQos"
+            },
+            user: {
+                value: ""
+            },
+            userType: {
+                value: "setUser"
+            },
+            password: {
+                value: ""
+            },
+            passwordType: {
+                value: "setPassword"
+            },
+            zoib: {
+                value: ""
+            },
+            zoibType: {
+                value: "setZoib",
+                validate: function(v) {
+                    var ttype = $("#node-input-zoibType").val() || this.zoibType;
+                    if (ttype != "setZoib" && v.trim() === "") {
+                        return false;
+                    }
+                    return true;
+                }
+            },
+            name: {
+                value: ""
+            }
+        },
+        inputs: 1,
+        outputs: 1,
+        color: "white",
+        paletteLabel: "zoib-mqtt",
+        icon: "bridge.png",
+        label: function() {
+            return this.name || "input zoib mqtt";
+        },
+        labelStyle: function() {
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: function() {
+            /*************************/
+            /****** CREATE TABS ******/
+            /*************************/
+            var tabs = RED.tabs.create({
+                id: "node-zoib-mqtt-tabs",
+                onchange: function(tab) {
+                    $("#node-zoib-mqtt-tabs-content").children().hide();
+                    $("#" + tab.id).show();
+                }
+            });
+            tabs.addTab({
+                id: "zoib-mqtt-tab-broker",
+                label: this._("zoib-input-mqtt.tabs-label.broker")
+            });
+            tabs.addTab({
+                id: "zoib-mqtt-tab-topic",
+                label: this._("zoib-input-mqtt.tabs-label.topic")
+            });
+            tabs.addTab({
+                id: "zoib-mqtt-tab-broker-option",
+                label: this._("zoib-input-mqtt.tabs-label.options")
+            });
+            tabs.addTab({
+                id: "zoib-mqtt-tab-credential",
+                label: this._("zoib-input-mqtt.tabs-label.credentials")
+            });
+            tabs.addTab({
+                id: "zoib-mqtt-tab-name",
+                label: this._("zoib-input-mqtt.tabs-label.name")
+            });
+            setTimeout(function() {
+                tabs.resize()
+            }, 0);
+
+            /*************************/
+            /****** TYPE TOPIC *******/
+            /*************************/
+            if (this.topicType == null) {
+                if (this.topic == "") {
+                    this.topicType = "setTopic";
+                } else {
+                    this.topicType = "str";
+                }
+            }
+
+            $("#node-input-topicType").val(this.topicType);
+
+            $("#node-input-topic").typedInput({
+                default: 'setTopic',
+                typeField: $("#node-input-topicType"),
+                types: [{
+                    value: "setTopic",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.topic",
+                    hasValue: false
+                }, "msg", "str"]
+            });
+
+            $("#node-input-topic").typedInput('type', this.topicType);
+
+            /*************************/
+            /******* TYPE QOS ********/
+            /*************************/
+            if (this.qosType == null) {
+                if (this.qos == "") {
+                    this.qosType = "setQos";
+                } else {
+                    this.qosType = "numQos";
+                }
+            }
+
+            $("#node-input-qosType").val(this.qosType);
+
+            $("#node-input-qos").typedInput({
+                default: 'setQos',
+                typeField: $("#node-input-qosType"),
+                types: [{
+                    value: "setQos",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.qos",
+                    hasValue: false
+                }, "msg", {
+                    value: "numQos",
+                    label: this._("zoib-input-mqtt.inputs.number"),
+                    icon: "red/images/typedInput/09.png",
+                    options: ["0", "1", "2"]
+                }]
+            });
+
+            $("#node-input-qos").typedInput('type', this.qosType);
+
+            /*************************/
+            /****** TYPE BROKER ******/
+            /*************************/
+            if (this.brokerType == null) {
+                if (this.broker == "") {
+                    this.brokerType = "setBroker";
+                } else {
+                    this.brokerType = "str";
+                }
+            }
+
+            $("#node-input-brokerType").val(this.brokerType);
+
+            $("#node-input-broker").typedInput({
+                default: 'setBroker',
+                typeField: $("#node-input-brokerType"),
+                types: [{
+                    value: "setBroker",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.broker.server",
+                    hasValue: false
+                }, "msg", "str", {
+                    value: "defBroker",
+                    label: "localhost",
+                    hasValue: false
+                }]
+            });
+
+            $("#node-input-broker").typedInput('type', this.brokerType);
+
+            /*************************/
+            /******* TYPE PORT *******/
+            /*************************/
+            if (this.portType == null) {
+                if (this.port == "") {
+                    this.portType = "setPort";
+                } else {
+                    this.portType = "num";
+                }
+            }
+
+            $("#node-input-portType").val(this.portType);
+
+            $("#node-input-port").typedInput({
+                default: 'setPort',
+                typeField: $("#node-input-portType"),
+                types: [{
+                    value: "setPort",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.broker.port",
+                    hasValue: false
+                }, "msg", "num", {
+                    value: "defPort",
+                    label: "1883",
+                    hasValue: false
+                }]
+            });
+
+            $("#node-input-port").typedInput('type', this.portType);
+
+            /*************************/
+            /**** TYPE CLIENT ID *****/
+            /*************************/
+            if (this.clientidType == null) {
+                if (this.clientid == "") {
+                    this.clientidType = "setClientid";
+                } else {
+                    this.clientidType = "str";
+                }
+            }
+
+            $("#node-input-clientidType").val(this.clientidType);
+
+            $("#node-input-clientid").typedInput({
+                default: 'setClientid',
+                typeField: $("#node-input-clientidType"),
+                types: [{
+                    value: "setClientid",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.broker.clientid",
+                    hasValue: false
+                }, "msg", "str", {
+                    value: "auto",
+                    label: this._("zoib-input-mqtt.inputs.auto"),
+                    hasValue: false
+                }]
+            });
+
+            $("#node-input-clientid").typedInput('type', this.clientidType);
+
+            /*************************/
+            /**** TYPE KEEPALIVE *****/
+            /*************************/
+            if (this.keepaliveType == null) {
+                if (this.keepalive == "") {
+                    this.keepaliveType = "setKeepalive";
+                } else {
+                    this.keepaliveType = "num";
+                }
+            }
+
+            $("#node-input-keepaliveType").val(this.keepaliveType);
+
+            $("#node-input-keepalive").typedInput({
+                default: 'setKeepalive',
+                typeField: $("#node-input-keepaliveType"),
+                types: [{
+                    value: "setKeepalive",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.broker.keepalive",
+                    hasValue: false
+                }, "msg", "num"]
+            });
+
+            $("#node-input-keepalive").typedInput('type', this.keepaliveType);
+
+            /*************************/
+            /****** TYPE CLEAN *******/
+            /*************************/
+            if (this.cleansessionType == null) {
+                if (this.cleansession == "") {
+                    this.cleansessionType = "setCleansession";
+                } else {
+                    this.cleansessionType = "bool";
+                }
+            }
+
+            $("#node-input-cleansessionType").val(this.cleansessionType);
+
+            $("#node-input-cleansession").typedInput({
+                default: 'setCleansession',
+                typeField: $("#node-input-cleansessionType"),
+                types: [{
+                    value: "setCleansession",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.broker.cleansession",
+                    hasValue: false
+                }, "msg", "bool"]
+            });
+
+            $("#node-input-cleansession").typedInput('type', this.cleansessionType);
+
+            /*************************/
+            /****** TYPE COMPAT ******/
+            /*************************/
+            if (this.compatmodeType == null) {
+                if (this.compatmode == "") {
+                    this.compatmodeType = "setCompatmode";
+                } else {
+                    this.compatmodeType = "bool";
+                }
+            }
+
+            $("#node-input-compatmodeType").val(this.compatmodeType);
+
+            $("#node-input-compatmode").typedInput({
+                default: 'setCompatmode',
+                typeField: $("#node-input-compatmodeType"),
+                types: [{
+                    value: "setCompatmode",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.broker.compatmode",
+                    hasValue: false
+                }, "msg", "bool"]
+            });
+
+            $("#node-input-compatmode").typedInput('type', this.compatmodeType);
+
+            /*************************/
+            /******* TYPE USER *******/
+            /*************************/
+            if (this.userType == null) {
+                if (this.user == "") {
+                    this.userType = "setUser";
+                } else {
+                    this.userType = "str";
+                }
+            }
+
+            $("#node-input-userType").val(this.userType);
+
+            $("#node-input-user").typedInput({
+                default: 'setUser',
+                typeField: $("#node-input-userType"),
+                types: [{
+                    value: "setUser",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.user",
+                    hasValue: false
+                }, "msg", "str", {
+                    value: "none",
+                    label: this._("zoib-input-mqtt.inputs.none"),
+                    hasValue: false
+                }]
+            });
+
+            $("#node-input-user").typedInput('type', this.userType);
+
+            /*************************/
+            /***** TYPE PASSWORD *****/
+            /*************************/
+            if (this.passwordType == null) {
+                if (this.password == "") {
+                    this.passwordType = "setPassword";
+                } else {
+                    this.passwordType = "str";
+                }
+            }
+
+            $("#node-input-passwordType").val(this.passwordType);
+
+            $("#node-input-password").typedInput({
+                default: 'setPassword',
+                typeField: $("#node-input-passwordType"),
+                types: [{
+                    value: "setPassword",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.password",
+                    hasValue: false
+                }, "msg", "str", {
+                    value: "none",
+                    label: this._("zoib-input-mqtt.inputs.none"),
+                    hasValue: false
+                }]
+            });
+
+            $("#node-input-password").on('change', function(event, value) {
+                if (value == "msg") {
+                    document.getElementById("node-input-password").type = 'text';
+                } else if (value == "str") {
+                    document.getElementById("node-input-password").type = 'password';
+                }
+            });
+
+            $("#node-input-password").typedInput('type', this.passwordType);
+
+            /*************************/
+            /******* TYPE ZOIB *******/
+            /*************************/
+            if (this.zoibType == null) {
+                if (this.zoib == "") {
+                    this.zoibType = "setZoib";
+                } else {
+                    this.zoibType = "str";
+                }
+            }
+
+            $("#node-input-zoibType").val(this.zoibType);
+
+            $("#node-input-zoib").typedInput({
+                default: 'setZoib',
+                typeField: $("#node-input-zoibType"),
+                types: [{
+                    value: "setZoib",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.zoib.server",
+                    hasValue: false
+                }, "msg", "str"]
+            });
+
+            $("#node-input-zoib").typedInput('type', this.zoibType);
+
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="zoib-output-mqtt">
+    <div class="form-row">
+        <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-zoib-mqtt-tabs"></ul>
+    </div>
+    <div id="node-zoib-mqtt-tabs-content" style="min-height: 170px;">
+        <div id="zoib-mqtt-tab-broker" style="display:none">
+            <div class="form-row">
+                <label for="node-input-broker"><i class="fa fa-globe"></i> <span data-i18n="zoib-input-mqtt.server"></label>
+                <input type="text" id="node-input-broker" style="width:70%">
+                <input type="hidden" id="node-input-brokerType">
+            </div>
+            <div class="form-row">
+                <label for="node-input-port"><i class="fa fa-globe"></i> <span data-i18n="zoib-input-mqtt.port"></label>
+                <input type="text" id="node-input-port" style="width:70%">
+                <input type="hidden" id="node-input-portType">
+            </div>
+        </div>
+        <div id="zoib-mqtt-tab-broker-option" style="display:none">
+            <div class="form-row">
+                <label for="node-input-clientid"><i class="fa fa-tag"></i> <span data-i18n="zoib-input-mqtt.clientid"></label>
+                <input type="text" id="node-input-clientid" style="width:70%">
+                <input type="hidden" id="node-input-clientidType">
+            </div>
+            <div class="form-row">
+                <label for="node-input-keepalive" style="width:auto"><i class="fa fa-clock-o"></i> <span data-i18n="zoib-input-mqtt.keepalive"></label>
+                <br/>
+                <span style="margin-left:100px"></span>
+                    <input type="text" id="node-input-keepalive" style="width:70%">
+                    <input type="hidden" id="node-input-keepaliveType">
+            </div>
+            <div class="form-row">
+                <label for="node-input-cleansession" style="width:auto"><i class="fa fa-check"></i> <span data-i18n="zoib-input-mqtt.cleansession"></label>
+                <br/>
+                <span style="margin-left:100px"></span>
+                    <input type="text" id="node-input-cleansession" style="width:70%">
+                    <input type="hidden" id="node-input-cleansessionType">
+            </div>
+            <div class="form-row">
+                <label for="node-input-compatmode" style="width:auto"><i class="fa fa-check"></i> <span data-i18n="zoib-input-mqtt.compatmode"></label>
+                <br/>
+                <span style="margin-left:100px"></span>
+                    <input type="text" id="node-input-compatmode" style="width:70%">
+                    <input type="hidden" id="node-input-compatmodeType">
+            </div>
+        </div>
+        <div id="zoib-mqtt-tab-topic" style="display:none">
+            <div class="form-row">
+                <label for="node-input-topic"><i class="fa fa-globe"></i> <span data-i18n="zoib-input-mqtt.topic"></label>
+                <input type="text" id="node-input-topic" style="width:70%">
+                <input type="hidden" id="node-input-topicType">
+            </div>
+            <div class="form-row">
+                <label for="node-input-qos"><i class="fa fa-empire"></i> <span data-i18n="zoib-input-mqtt.qos"></label>
+                <input type="text" id="node-input-qos" style="width:70%">
+                <input type="hidden" id="node-input-qosType">
+            </div>
+            <div class="form-row">
+                <label for="node-input-retain"><i class="fa fa-check"></i> <span data-i18n="zoib-input-mqtt.retain"></label>
+                <input type="text" id="node-input-retain" style="width:70%">
+                <input type="hidden" id="node-input-retainType">
+            </div>
+        </div>
+        <div id="zoib-mqtt-tab-credential" style="display:none">
+            <div class="form-row">
+                <label for="node-input-user"><i class="fa fa-user"></i> <span data-i18n="zoib-input-mqtt.username"></label>
+                <input type="text" id="node-input-user" style="width:70%">
+                <input type="hidden" id="node-input-userType">
+            </div>
+            <div class="form-row">
+                <label for="node-input-password"><i class="fa fa-lock"></i> <span data-i18n="zoib-input-mqtt.password"></label>
+                <input type="password" id="node-input-password" style="width:70%">
+                <input type="hidden" id="node-input-passwordType">
+            </div>
+            <div class="form-row">
+                <label for="node-input-zoib"><i class="fa fa-lock"></i> <span data-i18n="zoib-input-mqtt.zoib.server"></label>
+                <input type="text" id="node-input-zoib" style="width:70%">
+                <input type="hidden" id="node-input-zoibType">
+            </div>
+        </div>
+        <div id="zoib-mqtt-tab-name" style="display:none">
+            <div class="form-row">
+                <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="zoib-input-mqtt.name"></label>
+                <input type="text" id="node-input-name" placeholder="Name">
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/javascript">
+    RED.nodes.registerType('zoib-output-mqtt', {
+        category: "advanced",
+        defaults: {
+            broker: {
+                value: ""
+            },
+            brokerType: {
+                value: "setBroker"
+            },
+            port: {
+                value: ""
+            },
+            portType: {
+                value: "setPort"
+            },
+            clientid: {
+                value: ""
+            },
+            clientidType: {
+                value: "auto"
+            },
+            keepalive: {
+                value: "15"
+            },
+            keepaliveType: {
+                value: "num"
+            },
+            cleansession: {
+                value: "true"
+            },
+            cleansessionType: {
+                value: "bool"
+            },
+            compatmode: {
+                value: "true"
+            },
+            compatmodeType: {
+                value: "bool"
+            },
+            topic: {
+                value: "",
+                validate: function(v) {
+                    var ttype = $("#node-input-topicType").val() || this.topicType;
+                    if (ttype != "setTopic" && v.trim() === "") {
+                        return false;
+                    }
+                    return true;
+                }
+            },
+            topicType: {
+                value: "setTopic"
+            },
+            qos: {
+                value: "2"
+            },
+            qosType: {
+                value: "numQos"
+            },
+            retain: {
+                value: "false"
+            },
+            retainType: {
+                value: "bool"
+            },
+            user: {
+                value: ""
+            },
+            userType: {
+                value: "setUser"
+            },
+            password: {
+                value: ""
+            },
+            passwordType: {
+                value: "setPassword"
+            },
+            zoib: {
+                value: ""
+            },
+            zoibType: {
+                value: "setZoib",
+                validate: function(v) {
+                    var ttype = $("#node-input-zoibType").val() || this.zoibType;
+                    if (ttype != "setZoib" && v.trim() === "") {
+                        return false;
+                    }
+                    return true;
+                }
+            },
+            name: {
+                value: ""
+            }
+        },
+        inputs: 1,
+        outputs: 0,
+        color: "white",
+        paletteLabel: "output-mqtt",
+        icon: "bridge.png",
+        label: function() {
+            return this.name || "output zoib mqtt";
+        },
+        labelStyle: function() {
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: function() {
+            /*************************/
+            /****** CREATE TABS ******/
+            /*************************/
+            var tabs = RED.tabs.create({
+                id: "node-zoib-mqtt-tabs",
+                onchange: function(tab) {
+                    $("#node-zoib-mqtt-tabs-content").children().hide();
+                    $("#" + tab.id).show();
+                }
+            });
+            tabs.addTab({
+                id: "zoib-mqtt-tab-broker",
+                label: this._("zoib-input-mqtt.tabs-label.broker")
+            });
+            tabs.addTab({
+                id: "zoib-mqtt-tab-topic",
+                label: this._("zoib-input-mqtt.tabs-label.topic")
+            });
+            tabs.addTab({
+                id: "zoib-mqtt-tab-broker-option",
+                label: this._("zoib-input-mqtt.tabs-label.options")
+            });
+            tabs.addTab({
+                id: "zoib-mqtt-tab-credential",
+                label: this._("zoib-input-mqtt.tabs-label.credentials")
+            });
+            tabs.addTab({
+                id: "zoib-mqtt-tab-name",
+                label: this._("zoib-input-mqtt.tabs-label.name")
+            });
+            setTimeout(function() {
+                tabs.resize()
+            }, 0);
+
+            /*************************/
+            /****** TYPE TOPIC *******/
+            /*************************/
+            if (this.topicType == null) {
+                if (this.topic == "") {
+                    this.topicType = "setTopic";
+                } else {
+                    this.topicType = "str";
+                }
+            }
+
+            $("#node-input-topicType").val(this.topicType);
+
+            $("#node-input-topic").typedInput({
+                default: 'setTopic',
+                typeField: $("#node-input-topicType"),
+                types: [{
+                    value: "setTopic",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.topic",
+                    hasValue: false
+                }, "msg", "str"]
+            });
+
+            $("#node-input-topic").typedInput('type', this.topicType);
+
+            /*************************/
+            /******* TYPE QOS ********/
+            /*************************/
+            if (this.qosType == null) {
+                if (this.qos == "") {
+                    this.qosType = "setQos";
+                } else {
+                    this.qosType = "numQos";
+                }
+            }
+
+            $("#node-input-qosType").val(this.qosType);
+
+            $("#node-input-qos").typedInput({
+                default: 'setQos',
+                typeField: $("#node-input-qosType"),
+                types: [{
+                    value: "setQos",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.qos",
+                    hasValue: false
+                }, "msg", {
+                    value: "numQos",
+                    label: this._("zoib-input-mqtt.inputs.number"),
+                    icon: "red/images/typedInput/09.png",
+                    options: ["0", "1", "2"]
+                }]
+            });
+
+            $("#node-input-qos").typedInput('type', this.qosType);
+
+            /*************************/
+            /****** TYPE RETAIN ******/
+            /*************************/
+            if (this.retainType == null) {
+                if (this.retain == "") {
+                    this.retainType = "setRetain";
+                } else {
+                    this.retainType = "bool";
+                }
+            }
+
+            $("#node-input-retainType").val(this.retainType);
+
+            $("#node-input-retain").typedInput({
+                default: 'setRetain',
+                typeField: $("#node-input-retainType"),
+                types: [{
+                    value: "setRetain",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.retain",
+                    hasValue: false
+                }, "msg", "bool"]
+            });
+
+            $("#node-input-retain").typedInput('type', this.retainType);
+
+            /*************************/
+            /****** TYPE BROKER ******/
+            /*************************/
+            if (this.brokerType == null) {
+                if (this.broker == "") {
+                    this.brokerType = "setBroker";
+                } else {
+                    this.brokerType = "str";
+                }
+            }
+
+            $("#node-input-brokerType").val(this.brokerType);
+
+            $("#node-input-broker").typedInput({
+                default: 'setBroker',
+                typeField: $("#node-input-brokerType"),
+                types: [{
+                    value: "setBroker",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.broker.server",
+                    hasValue: false
+                }, "msg", "str", {
+                    value: "defBroker",
+                    label: "localhost",
+                    hasValue: false
+                }]
+            });
+
+            $("#node-input-broker").typedInput('type', this.brokerType);
+
+            /*************************/
+            /******* TYPE PORT *******/
+            /*************************/
+            if (this.portType == null) {
+                if (this.port == "") {
+                    this.portType = "setPort";
+                } else {
+                    this.portType = "num";
+                }
+            }
+
+            $("#node-input-portType").val(this.portType);
+
+            $("#node-input-port").typedInput({
+                default: 'setPort',
+                typeField: $("#node-input-portType"),
+                types: [{
+                    value: "setPort",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.broker.port",
+                    hasValue: false
+                }, "msg", "num", {
+                    value: "defPort",
+                    label: "1883",
+                    hasValue: false
+                }]
+            });
+
+            $("#node-input-port").typedInput('type', this.portType);
+
+            /*************************/
+            /**** TYPE CLIENT ID *****/
+            /*************************/
+            if (this.clientidType == null) {
+                if (this.clientid == "") {
+                    this.clientidType = "setClientid";
+                } else {
+                    this.clientidType = "str";
+                }
+            }
+
+            $("#node-input-clientidType").val(this.clientidType);
+
+            $("#node-input-clientid").typedInput({
+                default: 'setClientid',
+                typeField: $("#node-input-clientidType"),
+                types: [{
+                    value: "setClientid",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.broker.clientid",
+                    hasValue: false
+                }, "msg", "str", {
+                    value: "auto",
+                    label: this._("zoib-input-mqtt.inputs.auto"),
+                    hasValue: false
+                }]
+            });
+
+            $("#node-input-clientid").typedInput('type', this.clientidType);
+
+            /*************************/
+            /**** TYPE KEEPALIVE *****/
+            /*************************/
+            if (this.keepaliveType == null) {
+                if (this.keepalive == "") {
+                    this.keepaliveType = "setKeepalive";
+                } else {
+                    this.keepaliveType = "num";
+                }
+            }
+
+            $("#node-input-keepaliveType").val(this.keepaliveType);
+
+            $("#node-input-keepalive").typedInput({
+                default: 'setKeepalive',
+                typeField: $("#node-input-keepaliveType"),
+                types: [{
+                    value: "setKeepalive",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.broker.keepalive",
+                    hasValue: false
+                }, "msg", "num"]
+            });
+
+            $("#node-input-keepalive").typedInput('type', this.keepaliveType);
+
+            /*************************/
+            /****** TYPE CLEAN *******/
+            /*************************/
+            if (this.cleansessionType == null) {
+                if (this.cleansession == "") {
+                    this.cleansessionType = "setCleansession";
+                } else {
+                    this.cleansessionType = "bool";
+                }
+            }
+
+            $("#node-input-cleansessionType").val(this.cleansessionType);
+
+            $("#node-input-cleansession").typedInput({
+                default: 'setCleansession',
+                typeField: $("#node-input-cleansessionType"),
+                types: [{
+                    value: "setCleansession",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.broker.cleansession",
+                    hasValue: false
+                }, "msg", "bool"]
+            });
+
+            $("#node-input-cleansession").typedInput('type', this.cleansessionType);
+
+            /*************************/
+            /****** TYPE COMPAT ******/
+            /*************************/
+            if (this.compatmodeType == null) {
+                if (this.compatmode == "") {
+                    this.compatmodeType = "setCompatmode";
+                } else {
+                    this.compatmodeType = "bool";
+                }
+            }
+
+            $("#node-input-compatmodeType").val(this.compatmodeType);
+
+            $("#node-input-compatmode").typedInput({
+                default: 'setCompatmode',
+                typeField: $("#node-input-compatmodeType"),
+                types: [{
+                    value: "setCompatmode",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.broker.compatmode",
+                    hasValue: false
+                }, "msg", "bool"]
+            });
+
+            $("#node-input-compatmode").typedInput('type', this.compatmodeType);
+
+            /*************************/
+            /******* TYPE USER *******/
+            /*************************/
+            if (this.userType == null) {
+                if (this.user == "") {
+                    this.userType = "setUser";
+                } else {
+                    this.userType = "str";
+                }
+            }
+
+            $("#node-input-userType").val(this.userType);
+
+            $("#node-input-user").typedInput({
+                default: 'setUser',
+                typeField: $("#node-input-userType"),
+                types: [{
+                    value: "setUser",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.user",
+                    hasValue: false
+                }, "msg", "str", {
+                    value: "none",
+                    label: this._("zoib-input-mqtt.inputs.none"),
+                    hasValue: false
+                }]
+            });
+
+            $("#node-input-user").typedInput('type', this.userType);
+
+            /*************************/
+            /***** TYPE PASSWORD *****/
+            /*************************/
+            if (this.passwordType == null) {
+                if (this.password == "") {
+                    this.passwordType = "setPassword";
+                } else {
+                    this.passwordType = "str";
+                }
+            }
+
+            $("#node-input-passwordType").val(this.passwordType);
+
+            $("#node-input-password").typedInput({
+                default: 'setPassword',
+                typeField: $("#node-input-passwordType"),
+                types: [{
+                    value: "setPassword",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.password",
+                    hasValue: false
+                }, "msg", "str", {
+                    value: "none",
+                    label: this._("zoib-input-mqtt.inputs.none"),
+                    hasValue: false
+                }]
+            });
+
+            $("#node-input-password").on('change', function(event, value) {
+                if (value == "msg") {
+                    document.getElementById("node-input-password").type = 'text';
+                } else if (value == "str") {
+                    document.getElementById("node-input-password").type = 'password';
+                }
+            });
+            $("#node-input-password").typedInput('type', this.passwordType);
+
+            /*************************/
+            /******* TYPE ZOIB *******/
+            /*************************/
+            if (this.zoibType == null) {
+                if (this.zoib == "") {
+                    this.zoibType = "setZoib";
+                } else {
+                    this.zoibType = "str";
+                }
+            }
+
+            $("#node-input-zoibType").val(this.zoibType);
+
+            $("#node-input-zoib").typedInput({
+                default: 'setZoib',
+                typeField: $("#node-input-zoibType"),
+                types: [{
+                    value: "setZoib",
+                    label: this._("zoib-input-mqtt.inputs.setBy") + "  msg.zoib.server",
+                    hasValue: false
+                }, "msg", "str"]
+            });
+
+            $("#node-input-zoib").typedInput('type', this.zoibType);
+        }
+    });
+</script>

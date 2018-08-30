@@ -1,0 +1,101 @@
+<script type="text/x-red" data-help-name="zoib-input-mqtt">
+    <p>Connects to a broker and subscribes to the specified topic.</p>
+
+    <br/>
+    <h2>Outputs</h2>
+    <p>Outputs a message with the properties:</p>
+    <ul>
+        <li><code>msg.topic</code></li>
+        <li><code>msg.payload</code></li>
+        <li><code>msg.qos</code></li>
+        <li><code>msg.retain</code></li>
+    </ul>
+    <p><code>msg.payload</code> will be a String, unless it is detected as a binary buffer.</p>
+
+	<br/>
+    <h2>Inputs</h2>
+    <p>You can set properties to connect and subscribe to a specific broker and topic, then you don't need to have an input but you should :</p>
+    <ul>
+    	<li>set the broker URL</li>
+    	<li>set the broker port</li>
+    	<li>set the topic</li>
+    	<li>set the client ID to a string or to auto</li>
+    	<li>set the keep alive time with a number</li>
+    	<li>set the use of a clean session to true or false</li>
+    	<li>set the use of legacyMQTT 3.1 to true or false</li>
+    </ul>
+    <p>Otherwise, the node will wait an input to complete the missing parameters</p>
+    <p>For each parameters, you can set which one parameter you want to use</p>
+    <p>The default parameters tu use are :</p>
+    <ul>
+    	<li><code>msg.broker.server</code> for the broker URL</li>
+    	<li><code>msg.broker.port</code> for the broker port</li>
+    	<li><code>msg.topic</code> for the topic</li>
+    	<li><code>msg.qos</code> for the QoS (0, 1 or 2)</li>
+    	<li><code>msg.broker.clientid</code> for the client ID</li>
+    	<li><code>msg.broker.keepalive</code> for the keepalive (sec)</li>
+    	<li><code>msg.broker.cleansession</code> to use a clean session (true or false)</li>
+    	<li><code>msg.broker.compatmode</code> to use the legacyMQTT 3.1 (true or false)</li>
+    	<li><code>msg.user</code> for the username</li>
+    	<li><code>msg.password</code> for the password</li>
+    </ul>
+
+    <br/>
+    <p>Sample of input :</p>
+    <pre>
+msg.topic = "my/topic/+";
+msg.qos = 2;
+msg.broker = {
+    server: "localhost",
+    port: "1883",
+    clientid: "",
+    keepalive: 15,
+    cleansession: true,
+    compatmode: true
+}</pre>
+</script>
+<script type="text/x-red" data-help-name="output-mqtt">
+    <p>Connects to a MQTT broker and publishes messages.</p>
+
+    <p>You can set properties to connect and publish to a specific broker and topic, then you don't need set them with an input but you should :</p>
+    <ul>
+    	<li>set the broker URL</li>
+    	<li>set the broker port</li>
+    	<li>set the topic</li>
+    	<li>set the client ID to a string or to auto</li>
+    	<li>set the keep alive time with a number</li>
+    	<li>set the use of a clean session to true or false</li>
+    	<li>set the use of legacyMQTT 3.1 to true or false</li>
+    </ul>
+    <p>Otherwise, the node will wait an input to complete the missing parameters</p>
+    <p>For each parameters, you can set which one parameter you want to use</p>
+    <p>The default parameters to use are :</p>
+    <ul>
+    	<li><code>msg.broker.server</code> for the broker URL</li>
+    	<li><code>msg.broker.port</code> for the broker port</li>
+    	<li><code>msg.topic</code> for the topic</li>
+    	<li><code>msg.qos</code> for the QoS (0, 1 or 2)</li>
+    	<li><code>msg.retain</code> to retain message (true or false)</li>
+    	<li><code>msg.broker.clientid</code> for the client ID</li>
+    	<li><code>msg.broker.keepalive</code> for the keepalive (sec)</li>
+    	<li><code>msg.broker.cleansession</code> to use a clean session (true or false)</li>
+    	<li><code>msg.broker.compatmode</code> to use the legacyMQTT 3.1 (true or false)</li>
+    	<li><code>msg.user</code> for the username</li>
+    	<li><code>msg.password</code> for the password</li>
+    </ul>
+
+    <br/>
+    <p>Sample of input :</p>
+    <pre>
+msg.topic = "my/topic/message";
+msg.qos = 2;
+msg.broker = {
+    server:"localhost",
+    port: "1883",
+    clientid: "",
+    keepalive: 15,
+    cleansession: true,
+    compatmode: true
+}
+msg.payload = "hello :)"</pre>
+</script>
