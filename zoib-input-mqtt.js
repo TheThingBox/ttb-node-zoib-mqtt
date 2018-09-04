@@ -130,12 +130,16 @@ module.exports = function(RED) {
                 }
 
                 b.users = {};
+                b.reconnectTimeout = null
 
                 b.reconnect = function(){
                     console.log("--------------------------------------------------")
                     console.log("mqtt.reconnect")
                     if (!b.connected && !b.connecting) {
-                      setTimeout(() => {
+                      if(b.reconnectTimeout){
+                        clearTimeout(b.reconnectTimeout)
+                      }
+                      b.reconnectTimeout = setTimeout(() => {
                         if (!b.connected && !b.connecting) {
                           b.connect()
                         } else {
